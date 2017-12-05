@@ -2,6 +2,7 @@ package io.sudostream.classtimetable.dao
 
 import java.time._
 
+import com.mongodb.client.model.UpdateOptions
 import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.ClassTimetable
 import org.mongodb.scala.bson.{BsonArray, BsonDocument, BsonNumber, BsonString}
 import org.mongodb.scala.result.UpdateResult
@@ -51,15 +52,16 @@ class MongoInserterProxyImpl(mongoDbConnectionWrapper: MongoDbConnectionWrapper)
         "$push" -> BsonDocument(
           "classTimetables" -> classTimetableToInsertAsDocument
         )
-      )
+      ),
+      new UpdateOptions().upsert(true)
     )
     observable.toFuture()
   }
 
   private[dao] def convertClassTimetableToDocument(classTimetableToConvert: ClassTimetable): Document = {
-    val epochSecond = LocalDateTime.now.toInstant(ZoneOffset.UTC).getEpochSecond
+    val epoch = LocalDateTime.now.toInstant(ZoneOffset.UTC).toEpochMilli
     Document(
-      "epochSecond" -> BsonNumber(epochSecond)
+      "epoch" -> BsonNumber(epoch)
     )
   }
 
