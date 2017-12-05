@@ -1,0 +1,13 @@
+package io.sudostream.classtimetable.dao
+
+import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.ClassTimetable
+import org.mongodb.scala.Completed
+import org.mongodb.scala.result.UpdateResult
+
+import scala.concurrent.Future
+
+trait ClassTimetableWriterDao {
+
+  def upsertClassTimetable(classTimetableToInsert: ClassTimetable): Future[UpdateResult]
+
+}
