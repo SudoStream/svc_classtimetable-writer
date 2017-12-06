@@ -1,56 +1,26 @@
-package io.sudostream.classtimetable
+package io.sudostream.classtimetable.dao
 
-import akka.actor.ActorSystem
-import akka.http.javadsl.model.RequestEntity
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{HttpMethods, HttpRequest, HttpResponse}
-import akka.stream.ActorMaterializer
-import io.sudostream.timetoteach.kafka.serializing.systemwide.classtimetable.ClassTimetableSerializer
-import io.sudostream.timetoteach.kafka.serializing.systemwide.model.UserPreferencesSerializer
 import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.{ClassName, ClassTimetable, TimeToTeachId}
 import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.sessions._
 import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.subjectdetail.{SubjectDetail, SubjectDetailAdditionalInfo, SubjectDetailWrapper, SubjectName}
 import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.time.{ClassTimetableSchoolTimes, DayOfTheWeek, EndTime, StartTime}
-import org.scalatest._
 
-import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
+trait ClassTimeTableGenerator {
 
-class ClassTimetableWriterClientTest extends FlatSpec with Matchers {
-  implicit val system = ActorSystem()
-  implicit val materializer = ActorMaterializer()
-  // needed for the future flatMap/onComplete in the end
-  implicit val executionContext = system.dispatcher
+  def createClassTimetable(): ClassTimetable = {
+    val theSchoolTimes: ClassTimetableSchoolTimes = createSchoolTimes()
+    val theAllSessionsOfTheWeek: List[SessionOfTheDayWrapper] = createAllSessionsOfTheWeek()
 
-  println("ClassTimetableWriter Client Tester")
-
-  def classTimeTableServiceIsRunning: Future[HttpResponse] = {
-    Http().singleRequest(HttpRequest(uri = "http://localhost:9047/health"))
-  }
-
-  "Posting 'Class Timetable' to class timetable writer service" should "return 200" in {
-    val classTimetableSerializer = new ClassTimetableSerializer
-    val futureHttpPostResponse = for {
-      healthy <- classTimeTableServiceIsRunning
-      if healthy.status.isSuccess()
-      classTimetableBytes = classTimetableSerializer.serialize("ignore", createClassTimetable)
-      postFutureResponse <- Http().singleRequest(
-        HttpRequest(
-          method = HttpMethods.POST,
-          uri = "http://localhost:9047/api/classtimetables",
-          entity = classTimetableBytes
-        ))
-    } yield postFutureResponse.status.isSuccess()
-
-//    val eventualTerminated = system.terminate()
-//    Await.result(eventualTerminated, 3.seconds)
-
-
-    Await.result(futureHttpPostResponse, 10.seconds)
+    ClassTimetable(
+      TimeToTeachId("1234"),
+      ClassName("P3AB"),
+      schoolTimes = theSchoolTimes,
+      allSessionsOfTheWeek = theAllSessionsOfTheWeek
+    )
   }
 
 
-  def createAllSessionsOfTheWeek(): scala.List[SessionOfTheDayWrapper] = {
+  private def createAllSessionsOfTheWeek(): scala.List[SessionOfTheDayWrapper] = {
     SessionOfTheDayWrapper(SessionOfTheDay(
       sessionName = SessionName("EarlyMorningSession"),
       dayOfTheWeek = DayOfTheWeek.MONDAY,
@@ -128,7 +98,7 @@ class ClassTimetableWriterClientTest extends FlatSpec with Matchers {
       ) :: Nil
   }
 
-  def createSchoolTimes(): ClassTimetableSchoolTimes = {
+  private def createSchoolTimes(): ClassTimetableSchoolTimes = {
     val sessionBoundaries: List[SessionBoundaryWrapper] = createSessionBoundaries()
 
     ClassTimetableSchoolTimes(
@@ -136,16 +106,5 @@ class ClassTimetableWriterClientTest extends FlatSpec with Matchers {
     )
   }
 
-  def createClassTimetable: ClassTimetable = {
-    val theSchoolTimes: ClassTimetableSchoolTimes = createSchoolTimes()
-    val theAllSessionsOfTheWeek: List[SessionOfTheDayWrapper] = createAllSessionsOfTheWeek()
-
-    ClassTimetable(
-      TimeToTeachId("1234"),
-      ClassName("P3AB"),
-      schoolTimes = theSchoolTimes,
-      allSessionsOfTheWeek = theAllSessionsOfTheWeek
-    )
-  }
 
 }
