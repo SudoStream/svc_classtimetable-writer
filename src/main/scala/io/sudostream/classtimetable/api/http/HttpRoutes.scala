@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, StatusCodes}
 import akka.http.scaladsl.server.Directives.{path, _}
-import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.server.{Route, ValidationRejection}
 import akka.stream.Materializer
 import akka.util.Timeout
 import io.sudostream.classtimetable.api.kafka.StreamingComponents
@@ -30,7 +30,7 @@ class HttpRoutes(classTimetableDao: ClassTimetableWriterDao,
   implicit val timeout: Timeout = Timeout(30 seconds)
 
   val routes: Route =
-    path("api" / "classtimetables") {
+    path("api" / "classtimetables" / Segment / "upsert") { (tttUserId) =>
       post {
         decodeRequest {
           entity(as[HttpEntity]) { entity =>
@@ -61,8 +61,11 @@ class HttpRoutes(classTimetableDao: ClassTimetableWriterDao,
                 // TODO: To get here the classtimetable future must be completed and successful but my copmosing skills are lacking!
                 val classTimetable = classTimetableExtractedFuture.value.get.get
                 logger.info(s"Deserialised classtimetable: ${classTimetable.toString}")
-                complete(HttpEntity(ContentTypes.`text/plain(UTF-8)`, s"timeToTeachId=${classTimetable.timeToTeachId}"))
-
+                if (classTimetable.timeToTeachId.value == tttUserId) {
+                  complete(HttpEntity(ContentTypes.`text/plain(UTF-8)`, s"timeToTeachId=${classTimetable.timeToTeachId.value}"))
+                } else {
+                  reject(ValidationRejection(s"Uri Param time to teach Id '$tttUserId' does not equal id in class timetable ${classTimetable.timeToTeachId.value}"))
+                }
               case Failure(ex) => logger.error(s"Failed to deserialse classtimetable, ${ex.getMessage} : ${ex.getStackTrace.toString}")
                 complete(StatusCodes.InternalServerError, ex.getMessage)
             }

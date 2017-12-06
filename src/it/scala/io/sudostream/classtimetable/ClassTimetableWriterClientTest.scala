@@ -1,20 +1,19 @@
 package io.sudostream.classtimetable
 
 import akka.actor.ActorSystem
-import akka.http.javadsl.model.RequestEntity
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{HttpMethods, HttpRequest, HttpResponse}
 import akka.stream.ActorMaterializer
 import io.sudostream.timetoteach.kafka.serializing.systemwide.classtimetable.ClassTimetableSerializer
-import io.sudostream.timetoteach.kafka.serializing.systemwide.model.UserPreferencesSerializer
-import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.{ClassName, ClassTimetable, TimeToTeachId}
 import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.sessions._
 import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.subjectdetail.{SubjectDetail, SubjectDetailAdditionalInfo, SubjectDetailWrapper, SubjectName}
 import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.time.{ClassTimetableSchoolTimes, DayOfTheWeek, EndTime, StartTime}
+import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.{ClassName, ClassTimetable, TimeToTeachId}
 import org.scalatest._
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
+import scala.util.{Failure, Success}
 
 class ClassTimetableWriterClientTest extends FlatSpec with Matchers {
   implicit val system = ActorSystem()
@@ -37,16 +36,21 @@ class ClassTimetableWriterClientTest extends FlatSpec with Matchers {
       postFutureResponse <- Http().singleRequest(
         HttpRequest(
           method = HttpMethods.POST,
-          uri = "http://localhost:9047/api/classtimetables",
+          uri = "http://localhost:9047/api/classtimetables/1234/upsert",
           entity = classTimetableBytes
         ))
     } yield postFutureResponse.status.isSuccess()
 
-//    val eventualTerminated = system.terminate()
-//    Await.result(eventualTerminated, 3.seconds)
+    //    val eventualTerminated = system.terminate()
+    //    Await.result(eventualTerminated, 3.seconds)
 
+    futureHttpPostResponse.onComplete {
+      case Success(result) => println(s"Its true is it? ${result.toString}")
+      case Failure(ex) => println("Its expection")
+    }
 
-    Await.result(futureHttpPostResponse, 10.seconds)
+    val res = Await.result(futureHttpPostResponse, 10.seconds)
+    assert(res === true)
   }
 
 
@@ -57,7 +61,7 @@ class ClassTimetableWriterClientTest extends FlatSpec with Matchers {
       startTime = StartTime("09:00"),
       endTime = EndTime("10:30"),
       subjects = List(SubjectDetailWrapper(SubjectDetail(
-        SubjectName.EMPTY,
+        SubjectName.ASSEMBLY,
         StartTime("09:00"),
         EndTime("10:30"),
         SubjectDetailAdditionalInfo("")
