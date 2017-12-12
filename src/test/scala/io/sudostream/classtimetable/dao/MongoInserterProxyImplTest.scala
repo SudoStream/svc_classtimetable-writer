@@ -24,7 +24,7 @@ class MongoInserterProxyImplTest extends FunSuite with MockitoSugar with ClassTi
   test("Class Timetable as Document has a classtimetables document with a 'school times' array") {
     val mongoInserterProxy = new MongoInserterProxyImpl(connectionWrapperMock)
     val classTimetableAsDocument = mongoInserterProxy.convertClassTimetableToDocumentWithEpoch(createClassTimetable())
-    val maybeClassTimetablesDocument = classTimetableAsDocument.get[BsonDocument](CLASS_TIMETABLES)
+    val maybeClassTimetablesDocument = classTimetableAsDocument.get[BsonDocument](CLASS_TIMETABLES_FOR_SPECIFIC_CLASS)
     maybeClassTimetablesDocument match {
       case Some(timetablesDoc) =>
         assert(timetablesDoc.containsKey(SCHOOL_TIMES))
@@ -35,7 +35,7 @@ class MongoInserterProxyImplTest extends FunSuite with MockitoSugar with ClassTi
   test("Class Timetable as Document has a classtimetables document with a 'all sessions of the week' array") {
     val mongoInserterProxy = new MongoInserterProxyImpl(connectionWrapperMock)
     val classTimetableAsDocument = mongoInserterProxy.convertClassTimetableToDocumentWithEpoch(createClassTimetable())
-    val maybeClassTimetablesDocument = classTimetableAsDocument.get[BsonDocument](CLASS_TIMETABLES)
+    val maybeClassTimetablesDocument = classTimetableAsDocument.get[BsonDocument](CLASS_TIMETABLES_FOR_SPECIFIC_CLASS)
     maybeClassTimetablesDocument match {
       case Some(timetablesDoc) =>
         assert(timetablesDoc.containsKey(ALL_SESSIONS_OF_THE_WEEK))
@@ -46,7 +46,7 @@ class MongoInserterProxyImplTest extends FunSuite with MockitoSugar with ClassTi
   test("Class Timetable as Document has a classtimetables document with only 2 fields") {
     val mongoInserterProxy = new MongoInserterProxyImpl(connectionWrapperMock)
     val classTimetableAsDocument = mongoInserterProxy.convertClassTimetableToDocumentWithEpoch(createClassTimetable())
-    val maybeClassTimetablesDocument = classTimetableAsDocument.get[BsonDocument](CLASS_TIMETABLES)
+    val maybeClassTimetablesDocument = classTimetableAsDocument.get[BsonDocument](CLASS_TIMETABLES_FOR_SPECIFIC_CLASS)
     maybeClassTimetablesDocument match {
       case Some(timetablesDoc) =>
         assert(timetablesDoc.size() === 2)
@@ -57,7 +57,7 @@ class MongoInserterProxyImplTest extends FunSuite with MockitoSugar with ClassTi
   test("Class Timetable document's school times array has 6 time boundaries") {
     val mongoInserterProxy = new MongoInserterProxyImpl(connectionWrapperMock)
     val classTimetableAsDocument = mongoInserterProxy.convertClassTimetableToDocumentWithEpoch(createClassTimetable())
-    val maybeClassTimetablesDocument = classTimetableAsDocument.get[BsonDocument](CLASS_TIMETABLES)
+    val maybeClassTimetablesDocument = classTimetableAsDocument.get[BsonDocument](CLASS_TIMETABLES_FOR_SPECIFIC_CLASS)
     maybeClassTimetablesDocument match {
       case Some(timetablesDoc) =>
         println(timetablesDoc.toString)
@@ -69,7 +69,7 @@ class MongoInserterProxyImplTest extends FunSuite with MockitoSugar with ClassTi
   test("Class Timetable document's all sessions of the week array has 15 sessions") {
     val mongoInserterProxy = new MongoInserterProxyImpl(connectionWrapperMock)
     val classTimetableAsDocument = mongoInserterProxy.convertClassTimetableToDocumentWithEpoch(createClassTimetable())
-    val maybeClassTimetablesDocument = classTimetableAsDocument.get[BsonDocument](CLASS_TIMETABLES)
+    val maybeClassTimetablesDocument = classTimetableAsDocument.get[BsonDocument](CLASS_TIMETABLES_FOR_SPECIFIC_CLASS)
     maybeClassTimetablesDocument match {
       case Some(timetablesDoc) =>
         println(timetablesDoc.toString)

@@ -54,7 +54,7 @@ class MongoInserterProxyImpl(mongoDbConnectionWrapper: MongoDbConnectionWrapper)
       BsonDocument(TIME_TO_TEACH_ID -> BsonString(classTimetableToInsert.timeToTeachId.value)),
       BsonDocument(
         "$push" -> BsonDocument(
-          CLASS_TIMETABLES -> classTimetableToInsertAsDocument
+          ALL_USER_CLASS_TIMETABLES -> classTimetableToInsertAsDocument
         )
       ),
       new UpdateOptions().upsert(true)
@@ -67,7 +67,7 @@ class MongoInserterProxyImpl(mongoDbConnectionWrapper: MongoDbConnectionWrapper)
     Document(
       EPOCH_MILLI_UTC -> BsonNumber(epoch),
       CLASS_NAME -> BsonString(classTimetableToConvert.className.value),
-      CLASS_TIMETABLES -> convertClassTimetableToDocument(classTimetableToConvert)
+      CLASS_TIMETABLES_FOR_SPECIFIC_CLASS -> convertClassTimetableToDocument(classTimetableToConvert)
     )
   }
 

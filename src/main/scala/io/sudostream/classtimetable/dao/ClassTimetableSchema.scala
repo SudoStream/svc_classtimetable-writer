@@ -4,7 +4,8 @@ object ClassTimetableSchema {
   val TIME_TO_TEACH_ID = "_id"
   val EPOCH_MILLI_UTC = "epochMillisUTC"
   val CLASS_NAME = "className"
-  val CLASS_TIMETABLES = "classTimetables"
+  val ALL_USER_CLASS_TIMETABLES = "allUserClassTimetables"
+  val CLASS_TIMETABLES_FOR_SPECIFIC_CLASS = "classTimetablesForSpecificClass"
 
 
   // Sessions of the week
