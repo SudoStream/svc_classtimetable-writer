@@ -16,7 +16,7 @@ import io.sudostream.classtimetable.dao._
 // -Djavax.net.ssl.trustStore=/etc/ssl/cacerts
 // LOCAL_MONGO_DB=true
 
-object Main extends App {
+object Main extends App with MiniKubeHelper {
 
   lazy val configHelper: ConfigHelper = wire[ConfigHelper]
   lazy val streamingComponents = wire[StreamingComponents]
