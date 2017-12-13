@@ -3,7 +3,7 @@ package io.sudostream.classtimetable.dao
 import java.time._
 
 import com.mongodb.client.model.UpdateOptions
-import io.sudostream.classtimetable.dao.ClassTimetableSchema._
+import io.sudostream.classtimetable.dao.ClassTimetableMongoDbSchema._
 import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.ClassTimetable
 import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.sessions.SessionOfTheDayWrapper
 import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.subjectdetail.SubjectDetailWrapper

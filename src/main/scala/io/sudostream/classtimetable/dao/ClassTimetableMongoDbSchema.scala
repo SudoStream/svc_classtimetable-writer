@@ -1,6 +1,6 @@
 package io.sudostream.classtimetable.dao
 
-object ClassTimetableSchema {
+object ClassTimetableMongoDbSchema {
   val TIME_TO_TEACH_ID = "_id"
   val EPOCH_MILLI_UTC = "epochMillisUTC"
   val CLASS_NAME = "className"

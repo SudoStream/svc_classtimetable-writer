@@ -2,7 +2,7 @@ package io.sudostream.classtimetable.dao
 
 import org.scalatest.FunSuite
 import org.scalatest.mockito.MockitoSugar
-import ClassTimetableSchema._
+import ClassTimetableMongoDbSchema._
 import org.mongodb.scala.bson.{BsonArray, BsonDocument}
 
 class MongoInserterProxyImplTest extends FunSuite with MockitoSugar with ClassTimeTableGenerator {
