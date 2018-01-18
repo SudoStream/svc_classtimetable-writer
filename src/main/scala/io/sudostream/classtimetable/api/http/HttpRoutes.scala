@@ -107,7 +107,7 @@ class HttpRoutes(classTimetableDao: ClassTimetableWriterDao,
                 // TODO: To get here the class details future must be completed and successful but my composing skills are lacking!
                 val classDetails = newClassDetailsExtractedFuture.value.get.get
                 logger.info(s"Deserialised class details: ${classDetails.toString}")
-                if (classDetails.teacherWithWriteAccess.contains(tttUserId)) {
+                if (classDetails.teachersWithWriteAccess.contains(tttUserId)) {
                   complete(HttpEntity(ContentTypes.`text/plain(UTF-8)`, s"timeToTeachId=${tttUserId}"))
                 } else {
                   reject(ValidationRejection(s"Uri Param time to teach Id '$tttUserId' is not contained id in class details ${classDetails.toString}"))

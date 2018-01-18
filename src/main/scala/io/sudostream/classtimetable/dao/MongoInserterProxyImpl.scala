@@ -154,17 +154,15 @@ class MongoInserterProxyImpl(mongoDbConnectionWrapper: MongoDbConnectionWrapper)
     val observable = classesCollection.updateOne(
       BsonDocument(ClassDetailsMongoDbSchema.CLASS_ID -> BsonString(classDetails.classId.value)),
       BsonDocument(
-//        ClassDetailsMongoDbSchema.TEACHERS_WITH_WRITE_ACCESS -> convertTeachersWithWriteAccessToBsonArray(
-//          classDetails.teacherWithWriteAccess
-//        ),
-        "$push" -> BsonDocument(
-          ClassDetailsMongoDbSchema.AUDIT_LOG -> classDetailsToInsertAsDocument
+        "$set" -> BsonDocument(
+          classDetailsToInsertAsDocument
         )
       ),
       new UpdateOptions().upsert(true)
     )
     observable.toFuture()
   }
+
 
   def convertClassGroupsToBsonArray(classGroups: List[ClassGroupsWrapper]): BsonArray = {
     val classGroupsAsDocuments = for {
@@ -197,7 +195,7 @@ class MongoInserterProxyImpl(mongoDbConnectionWrapper: MongoDbConnectionWrapper)
       ClassDetailsMongoDbSchema.CLASS_NAME -> BsonString(classDetails.className.value),
       ClassDetailsMongoDbSchema.CLASS_GROUPS -> convertClassGroupsToBsonArray(classDetails.classGroups),
       ClassDetailsMongoDbSchema.TEACHERS_WITH_WRITE_ACCESS -> convertTeachersWithWriteAccessToBsonArray(
-        classDetails.teacherWithWriteAccess
+        classDetails.teachersWithWriteAccess
       )
     )
   }

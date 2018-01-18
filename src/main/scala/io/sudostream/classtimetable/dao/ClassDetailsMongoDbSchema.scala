@@ -7,7 +7,7 @@ object ClassDetailsMongoDbSchema {
   val CLASS_GROUPS = "classGroups"
   val TEACHERS_WITH_WRITE_ACCESS = "teachersWithWriteAccess"
 
-  val AUDIT_LOG = "audit_log"
+//  val AUDIT_LOG = "audit_log"
 
   val GROUP_ID = "groupId"
   val GROUP_NAME = "groupName"
