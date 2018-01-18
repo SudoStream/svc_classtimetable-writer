@@ -4,6 +4,7 @@ import java.time._
 
 import com.mongodb.client.model.UpdateOptions
 import io.sudostream.classtimetable.dao.ClassTimetableMongoDbSchema._
+import io.sudostream.timetoteach.messages.systemwide.model.classes.{ClassDetails, ClassGroupsWrapper}
 import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.ClassTimetable
 import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.sessions.SessionOfTheDayWrapper
 import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.subjectdetail.SubjectDetailWrapper
@@ -142,4 +143,63 @@ class MongoInserterProxyImpl(mongoDbConnectionWrapper: MongoDbConnectionWrapper)
       ALL_SESSIONS_OF_THE_WEEK -> sessionsOfTheWeekAsBsonArray
     )
   }
+
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+
+  val classesCollection: MongoCollection[Document] = mongoDbConnectionWrapper.getClassesCollection
+
+  override def upsertClass(classDetails: ClassDetails): Future[UpdateResult] = {
+    val classDetailsToInsertAsDocument = convertClassDetailsToDocumentWithEpoch(classDetails)
+    val observable = classesCollection.updateOne(
+      BsonDocument(ClassDetailsMongoDbSchema.CLASS_ID -> BsonString(classDetails.classId.value)),
+      BsonDocument(
+//        ClassDetailsMongoDbSchema.TEACHERS_WITH_WRITE_ACCESS -> convertTeachersWithWriteAccessToBsonArray(
+//          classDetails.teacherWithWriteAccess
+//        ),
+        "$push" -> BsonDocument(
+          ClassDetailsMongoDbSchema.AUDIT_LOG -> classDetailsToInsertAsDocument
+        )
+      ),
+      new UpdateOptions().upsert(true)
+    )
+    observable.toFuture()
+  }
+
+  def convertClassGroupsToBsonArray(classGroups: List[ClassGroupsWrapper]): BsonArray = {
+    val classGroupsAsDocuments = for {
+      groupWrapper <- classGroups
+      group = groupWrapper.group
+    } yield BsonDocument(
+      ClassDetailsMongoDbSchema.GROUP_ID -> BsonString(group.groupId.value),
+      ClassDetailsMongoDbSchema.GROUP_NAME -> BsonString(group.groupName.value),
+      ClassDetailsMongoDbSchema.GROUP_TYPE -> BsonString(group.groupType.toString.toUpperCase),
+      ClassDetailsMongoDbSchema.GROUP_LEVEL -> BsonString(group.groupLevel.toString.toUpperCase)
+    )
+
+    BsonArray(classGroupsAsDocuments)
+  }
+
+  def convertTeachersWithWriteAccessToBsonArray(teacherWithWriteAccess: List[String]): BsonArray = {
+    val teachersWithWriteAccessBsonArray = new BsonArray()
+
+    for (teacherId <- teacherWithWriteAccess) {
+      teachersWithWriteAccessBsonArray.add(BsonString(teacherId))
+    }
+
+    teachersWithWriteAccessBsonArray
+  }
+
+  private[dao] def convertClassDetailsToDocumentWithEpoch(classDetails: ClassDetails): Document = {
+    val epoch = LocalDateTime.now.toInstant(ZoneOffset.UTC).toEpochMilli
+    Document(
+      ClassDetailsMongoDbSchema.EPOCH_MILLI_UTC -> BsonNumber(epoch),
+      ClassDetailsMongoDbSchema.CLASS_NAME -> BsonString(classDetails.className.value),
+      ClassDetailsMongoDbSchema.CLASS_GROUPS -> convertClassGroupsToBsonArray(classDetails.classGroups),
+      ClassDetailsMongoDbSchema.TEACHERS_WITH_WRITE_ACCESS -> convertTeachersWithWriteAccessToBsonArray(
+        classDetails.teacherWithWriteAccess
+      )
+    )
+  }
+
 }

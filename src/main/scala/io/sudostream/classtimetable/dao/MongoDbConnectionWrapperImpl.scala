@@ -28,6 +28,7 @@ sealed class MongoDbConnectionWrapperImpl(actorSystemWrapper: ActorSystemWrapper
   private val mongoDbUri = new URI(mongoDbUriString)
   private val classTimetablesDatabaseName = config.getString("classtimetable-writer.database_name")
   private val classTimetableCollectionName = config.getString("classtimetable-writer.classtimetables_collection")
+  private val classesCollectionName = config.getString("classtimetable-writer.classes_collection")
 
   private val isLocalMongoDb: Boolean = try {
     if (sys.env("LOCAL_MONGO_DB") == "true") true else false
@@ -37,20 +38,24 @@ sealed class MongoDbConnectionWrapperImpl(actorSystemWrapper: ActorSystemWrapper
 
   log.info(s"Running Local = $isLocalMongoDb")
 
-  def getClassTimetableCollection: MongoCollection[Document] = {
-    def createMongoClient: MongoClient = {
-      if (isLocalMongoDb || Main.isMinikubeRun) {
-        buildLocalMongoDbClient
-      } else {
-        log.info(s"connecting to mongo db at '${mongoDbUri.getHost}:${mongoDbUri.getPort}'")
-        System.setProperty("org.mongodb.async.type", "netty")
-        MongoClient(mongoDbUriString)
-      }
+  private def createMongoClient: MongoClient = {
+    if (isLocalMongoDb || Main.isMinikubeRun) {
+      buildLocalMongoDbClient
+    } else {
+      log.info(s"connecting to mongo db at '${mongoDbUri.getHost}:${mongoDbUri.getPort}'")
+      System.setProperty("org.mongodb.async.type", "netty")
+      MongoClient(mongoDbUriString)
     }
+  }
 
-    val mongoClient = createMongoClient
-    val database: MongoDatabase = mongoClient.getDatabase(classTimetablesDatabaseName)
+  def getClassTimetableCollection: MongoCollection[Document] = {
+    val database: MongoDatabase = createMongoClient.getDatabase(classTimetablesDatabaseName)
     database.getCollection(classTimetableCollectionName)
+  }
+
+  def getClassesCollection: MongoCollection[Document] = {
+    val database: MongoDatabase = createMongoClient.getDatabase(classTimetablesDatabaseName)
+    database.getCollection(classesCollectionName)
   }
 
   private def buildLocalMongoDbClient = {

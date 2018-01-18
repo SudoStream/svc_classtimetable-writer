@@ -10,7 +10,9 @@ import akka.util.Timeout
 import io.sudostream.classtimetable.api.kafka.StreamingComponents
 import io.sudostream.classtimetable.config.ActorSystemWrapper
 import io.sudostream.classtimetable.dao.ClassTimetableWriterDao
+import io.sudostream.timetoteach.kafka.serializing.systemwide.classes.ClassDetailsDeserializer
 import io.sudostream.timetoteach.kafka.serializing.systemwide.classtimetable.ClassTimetableDeserializer
+import io.sudostream.timetoteach.messages.systemwide.model.classes.ClassDetails
 import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.ClassTimetable
 
 import scala.concurrent.duration._
@@ -58,7 +60,7 @@ class HttpRoutes(classTimetableDao: ClassTimetableWriterDao,
 
             onComplete(insertFutureCompleted) {
               case Success(insertCompleted) =>
-                // TODO: To get here the classtimetable future must be completed and successful but my copmosing skills are lacking!
+                // TODO: To get here the classtimetable future must be completed and successful but my composing skills are lacking!
                 val classTimetable = classTimetableExtractedFuture.value.get.get
                 logger.info(s"Deserialised classtimetable: ${classTimetable.toString}")
                 if (classTimetable.timeToTeachId.value == tttUserId) {
@@ -69,6 +71,51 @@ class HttpRoutes(classTimetableDao: ClassTimetableWriterDao,
               case Failure(ex) => logger.error(s"Failed to deserialse classtimetable, ${ex.getMessage} : ${ex.getStackTrace.toString}")
                 complete(StatusCodes.InternalServerError, ex.getMessage)
             }
+          }
+        }
+      }
+    } ~ path("api" / "classes" / Segment / "upsert") { (tttUserId) =>
+      post {
+        decodeRequest {
+          entity(as[HttpEntity]) { entity =>
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
+            val smallTimeout = 3000.millis
+            val dataFuture = entity.toStrict(smallTimeout) map {
+              httpEntity =>
+                httpEntity.getData()
+            }
+
+            val newClassDetailsExtractedFuture: Future[ClassDetails] = dataFuture map {
+              databytes =>
+                val bytesAsArray = databytes.toArray
+                val classDetailsDeserializer = new ClassDetailsDeserializer
+                classDetailsDeserializer.deserialize("ignore", bytesAsArray)
+            }
+
+            val insertClassDetailsEventualFuture = for {
+              theClassDetails <- newClassDetailsExtractedFuture
+              upsertClassDetailsFuture = classTimetableDao.upsertClass(theClassDetails)
+            } yield (upsertClassDetailsFuture, theClassDetails)
+
+            val insertFutureCompleted = {
+              insertClassDetailsEventualFuture map { tuple => tuple._1 }
+            }.flatMap(fut => fut)
+
+            onComplete(insertFutureCompleted) {
+              case Success(insertCompleted) =>
+                // TODO: To get here the class details future must be completed and successful but my composing skills are lacking!
+                val classDetails = newClassDetailsExtractedFuture.value.get.get
+                logger.info(s"Deserialised class details: ${classDetails.toString}")
+                if (classDetails.teacherWithWriteAccess.contains(tttUserId)) {
+                  complete(HttpEntity(ContentTypes.`text/plain(UTF-8)`, s"timeToTeachId=${tttUserId}"))
+                } else {
+                  reject(ValidationRejection(s"Uri Param time to teach Id '$tttUserId' is not contained id in class details ${classDetails.toString}"))
+                }
+              case Failure(ex) => logger.error(s"Failed to deserialse classtimetable, ${ex.getMessage} : ${ex.getStackTrace.toString}")
+                complete(StatusCodes.InternalServerError, ex.getMessage)
+            }
+            ////////////////////////////////////////////////////////////////////////////////////////////////////
           }
         }
       }
