@@ -5,7 +5,9 @@ object ClassDetailsMongoDbSchema {
   val EPOCH_MILLI_UTC = "epochMillisUTC"
   val CLASS_NAME = "className"
   val CLASS_GROUPS = "classGroups"
+
   val TEACHERS_WITH_WRITE_ACCESS = "teachersWithWriteAccess"
+  val TEACHERS_WHO_DELETED_CLASS = "teachersWhoDeletedClass"
 
 //  val AUDIT_LOG = "audit_log"
 

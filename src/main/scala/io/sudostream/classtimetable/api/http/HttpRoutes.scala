@@ -122,12 +122,17 @@ class HttpRoutes(classTimetableDao: ClassTimetableWriterDao,
       }
     } ~ path("api" / "classes" / Segment / Segment) { (tttUserId, classIdToDelete) =>
       delete {
+        logger.info(s"Deleting class $classIdToDelete " +
+          s"for user $tttUserId")
+
         val futureUpdateResult: Future[UpdateResult] = classTimetableDao.deleteClass(TimeToTeachId(tttUserId), classIdToDelete)
 
         val futureResponseToClient = futureUpdateResult.map { updateResult =>
           if (updateResult.getModifiedCount == 1) {
+            logger.info(s"Successfully deleted class $classIdToDelete for user $tttUserId")
             complete(StatusCodes.NoContent)
           } else if (updateResult.getModifiedCount == 0) {
+            logger.warning(s"Could not find class $classIdToDelete for user $tttUserId. No delete performed")
             complete(StatusCodes.NotFound)
           } else {
             val errorMsg = s"Failed to delete class id $classIdToDelete for user id $tttUserId"

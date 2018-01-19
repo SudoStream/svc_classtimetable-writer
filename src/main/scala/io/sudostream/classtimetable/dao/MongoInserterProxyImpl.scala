@@ -5,10 +5,10 @@ import java.time._
 import com.mongodb.client.model.UpdateOptions
 import io.sudostream.classtimetable.dao.ClassTimetableMongoDbSchema._
 import io.sudostream.timetoteach.messages.systemwide.model.classes.{ClassDetails, ClassGroupsWrapper}
-import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.{ClassTimetable, TimeToTeachId}
 import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.sessions.SessionOfTheDayWrapper
 import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.subjectdetail.SubjectDetailWrapper
 import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.time.ClassTimetableSchoolTimes
+import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.{ClassTimetable, TimeToTeachId}
 import org.mongodb.scala.bson.{BsonArray, BsonDocument, BsonNumber, BsonString}
 import org.mongodb.scala.result.UpdateResult
 import org.mongodb.scala.{Document, MongoCollection}
@@ -206,7 +206,11 @@ class MongoInserterProxyImpl(mongoDbConnectionWrapper: MongoDbConnectionWrapper)
   override def deleteClass(tttUserId: TimeToTeachId, classIdToDelete: String): Future[UpdateResult] = {
     val observable = classesCollection.updateOne(
       BsonDocument(ClassDetailsMongoDbSchema.CLASS_ID -> BsonString(classIdToDelete)),
-      BsonDocument("$$addToSet" -> BsonString(tttUserId.value)),
+      BsonDocument("$addToSet" ->
+        BsonDocument(
+          ClassDetailsMongoDbSchema.TEACHERS_WHO_DELETED_CLASS  -> BsonString(tttUserId.value)
+        )
+      ),
       new UpdateOptions().upsert(true)
     )
     observable.toFuture()
