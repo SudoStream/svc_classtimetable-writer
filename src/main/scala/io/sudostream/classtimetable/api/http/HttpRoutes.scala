@@ -13,7 +13,8 @@ import io.sudostream.classtimetable.dao.ClassTimetableWriterDao
 import io.sudostream.timetoteach.kafka.serializing.systemwide.classes.ClassDetailsDeserializer
 import io.sudostream.timetoteach.kafka.serializing.systemwide.classtimetable.ClassTimetableDeserializer
 import io.sudostream.timetoteach.messages.systemwide.model.classes.ClassDetails
-import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.ClassTimetable
+import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.{ClassTimetable, TimeToTeachId}
+import org.mongodb.scala.result.UpdateResult
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContextExecutor, Future}
@@ -117,6 +118,27 @@ class HttpRoutes(classTimetableDao: ClassTimetableWriterDao,
             }
             ////////////////////////////////////////////////////////////////////////////////////////////////////
           }
+        }
+      }
+    } ~ path("api" / "classes" / Segment / Segment) { (tttUserId, classIdToDelete) =>
+      delete {
+        val futureUpdateResult: Future[UpdateResult] = classTimetableDao.deleteClass(TimeToTeachId(tttUserId), classIdToDelete)
+
+        val futureResponseToClient = futureUpdateResult.map { updateResult =>
+          if (updateResult.getModifiedCount == 1) {
+            complete(StatusCodes.NoContent)
+          } else if (updateResult.getModifiedCount == 0) {
+            complete(StatusCodes.NotFound)
+          } else {
+            val errorMsg = s"Failed to delete class id $classIdToDelete for user id $tttUserId"
+            logger.error(errorMsg)
+            complete(StatusCodes.InternalServerError, errorMsg)
+          }
+        }
+
+        onComplete(futureResponseToClient) {
+          case Success(standardRoute) => standardRoute
+          case Failure(t) => complete(StatusCodes.InternalServerError, t.getMessage)
         }
       }
     } ~ health

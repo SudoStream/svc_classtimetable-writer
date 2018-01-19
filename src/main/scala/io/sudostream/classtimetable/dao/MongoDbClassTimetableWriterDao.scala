@@ -5,7 +5,7 @@ import akka.event.LoggingAdapter
 import akka.stream.Materializer
 import io.sudostream.classtimetable.config.ActorSystemWrapper
 import io.sudostream.timetoteach.messages.systemwide.model.classes.ClassDetails
-import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.ClassTimetable
+import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.{ClassTimetable, TimeToTeachId}
 import org.mongodb.scala.result.UpdateResult
 
 import scala.concurrent.{ExecutionContextExecutor, Future}
@@ -49,6 +49,11 @@ class MongoDbClassTimetableWriterDao(mongoFindQueriesProxy: MongoInserterProxy,
     }
 
     updateCompleted
+  }
+
+  override def deleteClass(tttUserId: TimeToTeachId, classIdToDelete: String): Future[UpdateResult] = {
+    logger.info(s"Deleting Class Id $classIdToDelete for user id $tttUserId")
+    mongoFindQueriesProxy.deleteClass(tttUserId, classIdToDelete)
   }
 
 }
