@@ -122,8 +122,7 @@ class HttpRoutes(classTimetableDao: ClassTimetableWriterDao,
       }
     } ~ path("api" / "classes" / Segment / Segment) { (tttUserId, classIdToDelete) =>
       delete {
-        logger.info(s"Deleting class $classIdToDelete " +
-          s"for user $tttUserId")
+        logger.info(s"Deleting class $classIdToDelete for user $tttUserId")
 
         val futureUpdateResult: Future[UpdateResult] = classTimetableDao.deleteClass(TimeToTeachId(tttUserId), classIdToDelete)
 
