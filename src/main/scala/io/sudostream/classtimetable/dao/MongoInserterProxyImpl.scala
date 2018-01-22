@@ -171,6 +171,7 @@ class MongoInserterProxyImpl(mongoDbConnectionWrapper: MongoDbConnectionWrapper)
     } yield BsonDocument(
       ClassDetailsMongoDbSchema.GROUP_ID -> BsonString(group.groupId.value),
       ClassDetailsMongoDbSchema.GROUP_NAME -> BsonString(group.groupName.value),
+      ClassDetailsMongoDbSchema.GROUP_DESCRIPTION -> BsonString(group.groupDescription),
       ClassDetailsMongoDbSchema.GROUP_TYPE -> BsonString(group.groupType.toString.toUpperCase),
       ClassDetailsMongoDbSchema.GROUP_LEVEL -> BsonString(group.groupLevel.toString.toUpperCase)
     )
@@ -193,6 +194,7 @@ class MongoInserterProxyImpl(mongoDbConnectionWrapper: MongoDbConnectionWrapper)
     Document(
       ClassDetailsMongoDbSchema.EPOCH_MILLI_UTC -> BsonNumber(epoch),
       ClassDetailsMongoDbSchema.CLASS_NAME -> BsonString(classDetails.className.value),
+      ClassDetailsMongoDbSchema.CLASS_DESCRIPTION -> BsonString(classDetails.classDescription),
       ClassDetailsMongoDbSchema.CLASS_GROUPS -> convertClassGroupsToBsonArray(classDetails.classGroups),
       ClassDetailsMongoDbSchema.TEACHERS_WITH_WRITE_ACCESS -> convertTeachersWithWriteAccessToBsonArray(
         classDetails.teachersWithWriteAccess
