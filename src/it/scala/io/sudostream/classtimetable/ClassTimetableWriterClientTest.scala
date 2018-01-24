@@ -8,7 +8,7 @@ import io.sudostream.timetoteach.kafka.serializing.systemwide.classtimetable.Cla
 import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.sessions._
 import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.subjectdetail.{SubjectDetail, SubjectDetailAdditionalInfo, SubjectDetailWrapper, SubjectName}
 import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.time.{ClassTimetableSchoolTimes, DayOfTheWeek, EndTime, StartTime}
-import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.{ClassName, ClassTimetable, TimeToTeachId}
+import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.{ClassId, ClassTimetable, TimeToTeachId}
 import org.scalatest._
 
 import scala.concurrent.duration._
@@ -146,7 +146,7 @@ class ClassTimetableWriterClientTest extends FlatSpec with Matchers {
 
     ClassTimetable(
       TimeToTeachId("1234"),
-      ClassName("P3AB"),
+      ClassId("P3AB"),
       schoolTimes = theSchoolTimes,
       allSessionsOfTheWeek = theAllSessionsOfTheWeek
     )

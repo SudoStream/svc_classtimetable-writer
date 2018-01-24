@@ -52,7 +52,7 @@ class MongoInserterProxyImpl(mongoDbConnectionWrapper: MongoDbConnectionWrapper)
   override def upsertClassTimetable(classTimetableToInsert: ClassTimetable): Future[UpdateResult] = {
     val classTimetableToInsertAsDocument = convertClassTimetableToDocumentWithEpoch(classTimetableToInsert)
     val observable = classTimetablesCollection.updateOne(
-      BsonDocument(TIME_TO_TEACH_ID -> BsonString(classTimetableToInsert.timeToTeachId.value)),
+      BsonDocument(_ID -> BsonString(classTimetableToInsert.classId.value)),
       BsonDocument(
         "$push" -> BsonDocument(
           ALL_USER_CLASS_TIMETABLES -> classTimetableToInsertAsDocument
@@ -67,7 +67,8 @@ class MongoInserterProxyImpl(mongoDbConnectionWrapper: MongoDbConnectionWrapper)
     val epoch = LocalDateTime.now.toInstant(ZoneOffset.UTC).toEpochMilli
     Document(
       EPOCH_MILLI_UTC -> BsonNumber(epoch),
-      CLASS_NAME -> BsonString(classTimetableToConvert.className.value),
+      CLASS_ID -> BsonString(classTimetableToConvert.classId.value),
+      TIME_TO_TEACH_ID -> BsonString(classTimetableToConvert.timeToTeachId.value),
       CLASS_TIMETABLES_FOR_SPECIFIC_CLASS -> convertClassTimetableToDocument(classTimetableToConvert)
     )
   }

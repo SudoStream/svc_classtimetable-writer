@@ -18,7 +18,7 @@ class MongoInserterProxyImplTest extends FunSuite with MockitoSugar with ClassTi
   test("Class Timetable as Document has a class name of 'P3AB'") {
     val mongoInserterProxy = new MongoInserterProxyImpl(connectionWrapperMock)
     val classTimetableAsDocument = mongoInserterProxy.convertClassTimetableToDocumentWithEpoch(createClassTimetable())
-    assert(classTimetableAsDocument.getString(CLASS_NAME) === "P3AB")
+    assert(classTimetableAsDocument.getString(CLASS_ID) === "P3AB")
   }
 
   test("Class Timetable as Document has a classtimetables document with a 'school times' array") {

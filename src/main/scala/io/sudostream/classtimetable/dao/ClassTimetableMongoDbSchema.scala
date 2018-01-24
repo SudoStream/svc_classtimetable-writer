@@ -1,9 +1,10 @@
 package io.sudostream.classtimetable.dao
 
 object ClassTimetableMongoDbSchema {
-  val TIME_TO_TEACH_ID = "_id"
+  val _ID = "_id"
+  val TIME_TO_TEACH_ID = "timeToTeachId"
   val EPOCH_MILLI_UTC = "epochMillisUTC"
-  val CLASS_NAME = "className"
+  val CLASS_ID = "classId"
   val ALL_USER_CLASS_TIMETABLES = "allUserClassTimetables"
   val CLASS_TIMETABLES_FOR_SPECIFIC_CLASS = "classTimetablesForSpecificClass"
 

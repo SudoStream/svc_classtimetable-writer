@@ -1,6 +1,6 @@
 package io.sudostream.classtimetable.dao
 
-import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.{ClassName, ClassTimetable, TimeToTeachId}
+import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.{ClassId, ClassTimetable, TimeToTeachId}
 import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.sessions._
 import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.subjectdetail.{SubjectDetail, SubjectDetailAdditionalInfo, SubjectDetailWrapper, SubjectName}
 import io.sudostream.timetoteach.messages.systemwide.model.classtimetable.time.{ClassTimetableSchoolTimes, DayOfTheWeek, EndTime, StartTime}
@@ -13,7 +13,7 @@ trait ClassTimeTableGenerator {
 
     ClassTimetable(
       TimeToTeachId("1234"),
-      ClassName("P3AB"),
+      ClassId("P3AB"),
       schoolTimes = theSchoolTimes,
       allSessionsOfTheWeek = theAllSessionsOfTheWeek
     )
