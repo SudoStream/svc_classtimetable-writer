@@ -11,7 +11,7 @@ lazy val commonSettings = Seq(
   name := "classtimetable-writer",
   organization := "io.sudostream",
   scalaVersion := "2.11.8",
-  version := "0.0.1-26",
+  version := "0.0.1-27",
 
   //docker
   dockerBaseImage := "anapsix/alpine-java:8_server-jre",
